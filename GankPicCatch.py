@@ -1,12 +1,13 @@
 # 爬取gank.io所有的妹子图
 
+import ssl
 import urllib.request
 import urllib.parse
 import json
 
 import os
 
-pic_save_path = "Picture/Gank/"
+pic_save_path = "output/Picture/Gank/"
 api_gank_url = "http://gank.io/api/data/" + urllib.parse.quote("福利")
 pic_count = 58 * 10 + 5  # 所有的图片数
 max_count = 50  # 一页最多读取的数据量
@@ -22,9 +23,11 @@ def fetch_meizi_pic(url):
 
 
 def download_pic(url):
+    ssl._create_default_https_context = ssl._create_unverified_context
     resp = urllib.request.urlopen(url)
     pic = resp.read()
     try:
+        print(url)
         pic_name = url.split("/")[-1]
         with open(pic_save_path + pic_name, "wb") as f:
             f.write(pic)
