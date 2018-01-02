@@ -1,4 +1,5 @@
-# 抓取：http://www.zhangzishi.cc/ 中的福利社专题
+# 抓取: http://www.win4000.com/meitu.html 上所有妹子图
+
 import urllib.request
 import os
 import ssl
@@ -6,10 +7,8 @@ import urllib.error
 
 from bs4 import BeautifulSoup
 
-base_url = 'http://www.zhangzishi.cc/category/welfare/'
-pic_save_path = "output/Picture/FuliShe/"
-cookie_file = 'cookie.txt'
-page_max = 63
+base_url = 'http://www.win4000.com/meitu.html'
+pic_save_path = "output/Picture/win4000/"
 
 
 # 下载图片
@@ -29,41 +28,42 @@ def download_pic(url, dir_name):
         print(str(reason))
 
 
-# 获得套图Url
+# 获得套图url
 def catch_pic_diagrams_url(url):
     url_list = []
     req = urllib.request.Request(url)
     resp = urllib.request.urlopen(req).read().decode('utf-8')
     soup = BeautifulSoup(resp, 'html.parser')
-    articles = soup.findAll('article', attrs={'class': 'excerpt'})
-    for article in articles:
-        url_list.append(article.a['href'])
+    divs = soup.findAll('div', attrs={'class': 'list_cont list_cont2 w1180'})
+    for div in divs[1:]:
+        lis = div.findAll('li')
+        for li in lis:
+            url_list.append(li.a['href'])
     return url_list
 
 
-# 获取套图Url里所有的图片
+# 获取套图里的图片
 def catch_pic_diagrams(url):
     req = urllib.request.Request(url)
     resp = urllib.request.urlopen(req).read().decode('utf-8')
     soup = BeautifulSoup(resp, 'html.parser')
-    # 先拿标题建文件夹：
-    article_header = soup.find('header', attrs={'class': 'article-header'}).find('a').get_text().replace(':', " ")
-    save_path = pic_save_path + article_header + "/"
+    title = soup.find('div', attrs={'class': 'ptitle'}).h1.get_text()
+    save_path = pic_save_path + title + '/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    print("开始下载：" + article_header)
-    # 拿图片url
-    imgs = soup.find('article').findAll('img')
-    for img in imgs[:-1]:
-        download_pic(img['src'].lstrip('/'), save_path)
+    ul = soup.find('ul', attrs={'class': 'scroll-img scroll-img02 clearfix'})
+    lis = ul.findAll('li')
+    for li in lis:
+        pic_req = urllib.request.Request(li.a['href'])
+        pic_resp = urllib.request.urlopen(pic_req).read().decode('utf-8')
+        pic_soup = BeautifulSoup(pic_resp, 'html.parser')
+        pic_div = pic_soup.find('div', attrs={'id': 'pic-meinv'})
+        pic_url = pic_div.find('img')['data-original']
+        download_pic(pic_url, save_path)
 
 
 if __name__ == '__main__':
-    for page in range(1, page_max + 1):
-        if page == 1:
-            url = base_url
-        else:
-            url = base_url + "page/" + str(page)
-        pic_list = catch_pic_diagrams_url(url)
-        for pic in pic_list:
-            catch_pic_diagrams(pic)
+    url_list = catch_pic_diagrams_url(base_url)
+    for url in url_list:
+        print("开始抓取：" + url)
+        catch_pic_diagrams(url)
