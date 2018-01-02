@@ -3,7 +3,6 @@
 import urllib.request
 import os
 from bs4 import BeautifulSoup
-import re
 
 search_url = "http://www.ip138.com/post"
 base_url = "http://www.ip138.com"
