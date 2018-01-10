@@ -1,5 +1,6 @@
 import os
 from selenium import webdriver
+
 from bs4 import BeautifulSoup
 import urllib.request
 import ssl
@@ -35,7 +36,9 @@ def download_pic(url):
 
 # 打开浏览器模拟请求
 def browser_get():
-    browser = webdriver.Chrome()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    browser = webdriver.Chrome(chrome_options=chrome_options)
     browser.get('http://jandan.net/ooxx')
     html_text = browser.page_source
     page_count = get_page_count(html_text)
