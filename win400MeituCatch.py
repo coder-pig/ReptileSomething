@@ -118,15 +118,19 @@ def download_pic(url, dir_name):
 
 # 获取套图里的图片
 def catch_pic_diagrams(url, tag):
-    req = urllib.request.Request(url)
-    resp = urllib.request.urlopen(req).read().decode('utf-8')
-    soup = BeautifulSoup(resp, 'html.parser')
-    title = soup.find('div', attrs={'class': 'ptitle'}).h1.get_text()
-    save_path = pic_save_path + tag + '/' + title + '/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    ul = soup.find('ul', attrs={'class': 'scroll-img scroll-img02 clearfix'})
-    lis = ul.findAll('li')
+    save_path = ''
+    try:
+        req = urllib.request.Request(url)
+        resp = urllib.request.urlopen(req).read().decode('utf-8')
+        soup = BeautifulSoup(resp, 'html.parser')
+        title = soup.find('div', attrs={'class': 'ptitle'}).h1.get_text()
+        save_path = pic_save_path + tag + '/' + title + '/'
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        ul = soup.find('ul', attrs={'class': 'scroll-img scroll-img02 clearfix'})
+        lis = ul.findAll('li')
+    except (OSError, urllib.error.HTTPError, urllib.error.URLError, Exception) as reason:
+        print(str(reason))
     for li in lis:
         pic_req = urllib.request.Request(li.a['href'])
         pic_resp = urllib.request.urlopen(pic_req).read().decode('utf-8')
@@ -148,19 +152,18 @@ if __name__ == '__main__':
         print(i)
 
     print("\n================================================== 解析标签页：\n ")
-    for tag in tag_url_list[0:1]:
+    for tag in tag_url_list[1:]:
         set_url_list = []
         tag_name = tag.split('-')[0]
         tag_url = tag.split('-')[1]
-        print("\n========================== 开始下载：%s ==========================\n" % tag_name)
-        # 先拿这一页的
-        set_url_list += get_pic_set(tag_url)
-        # 其他页的
-        page_url_list = get_pic_set_page(tag_url)
-        for page_url in page_url_list:
-            set_url_list += get_pic_set(page_url)
-        # 获取套图页里所有的图片并下载
-        for url in set_url_list:
-            catch_pic_diagrams(url, tag_name)
-
-
+        if tag_name.find('美女') != -1:
+            print("\n========================== 开始下载：%s ==========================\n" % tag_name)
+            # 先拿这一页的
+            set_url_list += get_pic_set(tag_url)
+            # 其他页的
+            page_url_list = get_pic_set_page(tag_url)
+            for page_url in page_url_list:
+                set_url_list += get_pic_set(page_url)
+            # 获取套图页里所有的图片并下载
+            for url in set_url_list:
+                catch_pic_diagrams(url, tag_name)
