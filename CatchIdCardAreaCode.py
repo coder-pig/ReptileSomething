@@ -1,4 +1,5 @@
 # 抓取身份证上前六位对应的行政区划代码
+# 接口貌似被屏蔽了，备用
 
 import urllib.request
 import os
@@ -46,6 +47,7 @@ def save_to_file(code_list, city_list):
         print(str(reason))
     else:
         print("文件写入完毕！")
+
 
 if __name__ == '__main__':
     catch_city_code()

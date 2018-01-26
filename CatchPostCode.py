@@ -3,6 +3,7 @@
 import urllib.request
 import os
 from bs4 import BeautifulSoup
+import coderpig
 
 search_url = "http://www.ip138.com/post"
 base_url = "http://www.ip138.com"
@@ -60,4 +61,4 @@ if __name__ == '__main__':
     city_list = get_city_list()
     for url in city_list:
         print("抓取: " + url)
-        write_to_file(get_post_code(url))
+        coderpig.write_list_data(get_post_code(url), file_path + file_name, type='a+')

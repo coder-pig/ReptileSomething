@@ -1,11 +1,9 @@
 # 通过中国气象局爬取到所有城市编码
 
-import urllib.request
-
 import os
-from bs4 import BeautifulSoup
 import re
 import operator
+import coderpig
 
 # 中国气象网基地址
 weather_base_url = "http://www.weather.com.cn"
@@ -15,6 +13,7 @@ weather_hb_url = "http://www.weather.com.cn/textFC/hb.shtml#"
 file_path = "output/"
 # 文件名
 file_name = 'city_code.txt'
+
 
 # 列表写入文件
 def write_to_file(data_list):
@@ -33,9 +32,7 @@ def write_to_file(data_list):
 # 获得城市列表链接
 def get_city_list_url():
     city_list_url = []
-    weather_hb_resp = urllib.request.urlopen(weather_hb_url)
-    weather_hb_html = weather_hb_resp.read().decode('utf-8')
-    weather_hb_soup = BeautifulSoup(weather_hb_html, 'html.parser')
+    weather_hb_soup = coderpig.get_bs(coderpig.get_resp(weather_hb_url).decode('utf-8'))
     weather_box = weather_hb_soup.find(attrs={'class': 'lqcontentBoxheader'})
     weather_a_list = weather_box.findAll('a')
     for i in weather_a_list:
@@ -47,10 +44,7 @@ def get_city_list_url():
 def get_city_code(city_list_url):
     city_code_dict = {}  # 创建一个空字典
     city_pattern = re.compile(r'^<a.*?weather/(.*?).s.*</a>$')  # 获取城市编码的正则
-
-    weather_hb_resp = urllib.request.urlopen(city_list_url)
-    weather_hb_html = weather_hb_resp.read().decode('utf-8')
-    weather_hb_soup = BeautifulSoup(weather_hb_html, 'html.parser')
+    weather_hb_soup = coderpig.get_bs(coderpig.get_resp(city_list_url).decode('utf-8'))
     # 需要过滤一波无效的
     div_conMidtab = weather_hb_soup.find_all(attrs={'class': 'conMidtab', 'style': ''})
 

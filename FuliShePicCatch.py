@@ -1,40 +1,18 @@
 # 抓取：http://www.zhangzishi.cc/ 中的福利社专题
-import urllib.request
-import os
-import ssl
-import urllib.error
 
-from bs4 import BeautifulSoup
+import coderpig
 
-base_url = 'http://www.zhangzishi.cc/category/welfare/'
+
+base_url = 'http://www.zhangzishi.cc/category/welfare'
 pic_save_path = "output/Picture/FuliShe/"
 cookie_file = 'cookie.txt'
 page_max = 63
 
 
-# 下载图片
-def download_pic(url, dir_name):
-    correct_url = url
-    ssl._create_default_https_context = ssl._create_unverified_context
-    if not url.startswith('http'):
-        correct_url = 'http://' + url
-    req = urllib.request.Request(correct_url)
-    try:
-        resp = urllib.request.urlopen(req)
-        pic = resp.read()
-        pic_name = correct_url.split("/")[-1]
-        with open(dir_name + pic_name, "wb+") as f:
-            f.write(pic)
-    except (OSError, urllib.error.HTTPError, urllib.error.URLError, Exception) as reason:
-        print(str(reason))
-
-
 # 获得套图Url
 def catch_pic_diagrams_url(url):
     url_list = []
-    req = urllib.request.Request(url)
-    resp = urllib.request.urlopen(req).read().decode('utf-8')
-    soup = BeautifulSoup(resp, 'html.parser')
+    soup = coderpig.get_bs(coderpig.get_resp(url).decode('utf-8'))
     articles = soup.findAll('article', attrs={'class': 'excerpt'})
     for article in articles:
         url_list.append(article.a['href'])
@@ -43,22 +21,20 @@ def catch_pic_diagrams_url(url):
 
 # 获取套图Url里所有的图片
 def catch_pic_diagrams(url):
-    req = urllib.request.Request(url)
-    resp = urllib.request.urlopen(req).read().decode('utf-8')
-    soup = BeautifulSoup(resp, 'html.parser')
+    soup = coderpig.get_bs(coderpig.get_resp(url).decode('utf-8'))
     # 先拿标题建文件夹：
     article_header = soup.find('header', attrs={'class': 'article-header'}).find('a').get_text().replace(':', " ")
     save_path = pic_save_path + article_header + "/"
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    coderpig.is_dir_existed(save_path)
     print("开始下载：" + article_header)
     # 拿图片url
     imgs = soup.find('article').findAll('img')
     for img in imgs[:-1]:
-        download_pic(img['src'].lstrip('/'), save_path)
+        coderpig.download_pic(img['src'].lstrip('/'), save_path)
 
 
 if __name__ == '__main__':
+    coderpig.init_https()
     for page in range(1, page_max + 1):
         if page == 1:
             url = base_url
