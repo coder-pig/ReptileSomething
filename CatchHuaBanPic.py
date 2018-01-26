@@ -1,13 +1,13 @@
 import os
-from selenium import webdriver
 
 from bs4 import BeautifulSoup
 import urllib.request
-import ssl
 import urllib.error
 import time
 import re
 import math
+import coderpig
+from selenium import webdriver
 
 base_url = 'http://huaban.com'  # 抓取源地址
 user_id = 'uaremyworld'  # 用户名
@@ -15,23 +15,15 @@ scroll_js = "var q=document.documentElement.scrollTop=100000"  # 滚动到底部
 count_pattern = re.compile(r'^(\d+)采集')
 
 
-# 初始化一个browser
-def init_browser():
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
-    browser = webdriver.Chrome(chrome_options=chrome_options)
-    return browser
-
-
 # 抓取花瓣某个用户的所有画板
 def catch_panels(browser):
-    # panels_url = base_url + '/' + user_id + '/'
-    # browser.get(panels_url)
-    # scroll_js = "var q=document.documentElement.scrollTop=100000"
-    # for i in range(10):
-    #     browser.execute_script(scroll_js)
-    #     time.sleep(1)
-    # html_text = browser.page_source
+    panels_url = base_url + '/' + user_id + '/'
+    browser.get(panels_url)
+    scroll_js = "var q=document.documentElement.scrollTop=100000"
+    for i in range(10):
+        browser.execute_script(scroll_js)
+        time.sleep(1)
+    html_text = browser.page_source
     # 解析拿到所有画板url
     panel_url_list = []
     panels_soup = BeautifulSoup(open('Test.html'), "html.parser")
@@ -66,7 +58,11 @@ def catch_panel_pic_url(browser, url):
 
 
 if __name__ == '__main__':
-    ssl._create_default_https_context = ssl._create_unverified_context
-    browser = init_browser()
-    panels_list = catch_panels(browser)
-    catch_panel_pic_url(browser, panels_list[0])
+    coderpig.init_https()
+    # panels_list = catch_panels(browser)
+    # catch_panel_pic_url(browser, panels_list[0])
+    # print(panels_list[0])
+    browser = webdriver.Chrome()
+    test_url = 'http://huaban.com/boards/18907029/'
+    browser.set_window_size(1280, 800)
+    browser.get(test_url)

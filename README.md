@@ -4,7 +4,7 @@
 
 ## 用Python抓点东西玩玩
 
-## 我的简易模块：coderpig.py
+## **我的简易模块：coderpig.py**
 
 - init_https()：启用Https支持
 - get_resp(url, headers=None, proxy=None, read=True)：根据url获得resp
@@ -36,6 +36,9 @@
 - **CatchIdCardAreaCodeN.py**：抓取所有身份证前六位对应的行政区划代码
 - **CsdnLogin.py**：CSDN模拟登录保存Cookie并使用Cookie访问
 
+## 3.工具脚本
+
+- **CsdnReaderHelper.py**：刷CSDN博客访问量
 
 ## 生成文件：
 

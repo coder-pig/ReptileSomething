@@ -6,6 +6,7 @@ import random
 import urllib.error
 from bs4 import BeautifulSoup
 from selenium import webdriver
+import time
 
 # 默认请求头
 default_req_headers = {
@@ -24,7 +25,7 @@ def init_https():
 
 
 # 2.根据url获得resp
-def get_resp(url, headers=None, proxy=None, read=True):
+def get_resp(url, headers=None, proxy=None, read=True, timeout=15):
     if proxy is not None:
         handler = urllib.request.ProxyHandler({'https': proxy})
         opener = urllib.request.build_opener(handler)
@@ -35,7 +36,7 @@ def get_resp(url, headers=None, proxy=None, read=True):
         headers = merge_dicts(headers, default_req_headers)
     req = urllib.request.Request(url, headers=headers)
     try:
-        resp = urllib.request.urlopen(req)
+        resp = urllib.request.urlopen(req, timeout=timeout)
         if read:
             return resp.read()
         else:
@@ -123,7 +124,7 @@ def get_proxy_ip():
     global proxy_ip_list
     if len(proxy_ip_list) == 0:
         proxy_ip_list = load_data(proxy_ip_file)
-    return proxy_ip_list[random.randint(0, 199)]
+    return proxy_ip_list[random.randint(0, 250)]
 
 
 # 11.合并字典
