@@ -2,6 +2,7 @@
 import coderpig
 import random
 
+list_url = "http://blog.csdn.net/coder_pig?viewmode=list"
 content_url = "http://blog.csdn.net/coder_pig?viewmode=contents"
 base_url = "http://blog.csdn.net"
 base_article_list = "http://blog.csdn.net/zpj779878443/article/list/"
@@ -16,7 +17,7 @@ headers = {
 # 根据尾页获得最后页数
 def get_page_count():
     proxy_ip = coderpig.get_proxy_ip()
-    soup = coderpig.get_bs(coderpig.get_resp(content_url, headers=headers, proxy=proxy_ip).decode('utf-8'))
+    soup = coderpig.get_bs(coderpig.get_resp(list_url, headers=headers, proxy=proxy_ip).decode('utf-8'))
     div = soup.find('div', attrs={'id': 'papelist'})
     page_count = (div.findAll('a')[-1]['href']).split('/')[-1]
     return page_count
@@ -26,7 +27,7 @@ def get_page_count():
 def get_article_url(url):
     proxy_ip = coderpig.get_proxy_ip()
     soup = coderpig.get_bs(coderpig.get_resp(url, headers=headers, proxy=proxy_ip).decode('utf-8'))
-    div = soup.find('div', attrs={'class': 'list_item_new'})
+    div = soup.find('div', attrs={'id': 'article_list'})
     spans = div.findAll('span', attrs={'class': 'link_title'})
     for span in spans:
         coderpig.write_str_data(base_url + span.find('a')['href'], articles_file)
