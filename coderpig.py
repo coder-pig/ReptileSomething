@@ -13,6 +13,12 @@ default_req_headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 '
                   'Safari/537.36 '
 }
+
+# ie专用请求头
+ie_req_header = {
+    'User-Agent': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0)'
+}
+
 # 代理ip列表
 proxy_ip_list = []
 # 代理ip列表文件
@@ -25,15 +31,21 @@ def init_https():
 
 
 # 2.根据url获得resp
-def get_resp(url, headers=None, proxy=None, read=True, timeout=15):
+def get_resp(url, headers=None, proxy=None, read=True, timeout=15, ie_header=False):
     if proxy is not None:
         handler = urllib.request.ProxyHandler({'https': proxy})
         opener = urllib.request.build_opener(handler)
         urllib.request.install_opener(opener)
     if headers is None:
-        headers = default_req_headers
+        if not ie_header:
+            headers = default_req_headers
+        else:
+            headers = ie_req_header
     else:
-        headers = merge_dicts(headers, default_req_headers)
+        if not ie_header:
+            headers = merge_dicts(headers, default_req_headers)
+        else:
+            headers = merge_dicts(headers, ie_req_header)
     req = urllib.request.Request(url, headers=headers)
     try:
         resp = urllib.request.urlopen(req, timeout=timeout)
