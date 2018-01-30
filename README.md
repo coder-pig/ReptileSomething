@@ -27,6 +27,7 @@
 - **CatchTuChongPic.py**：抓取 https://tuchong.com/tags/%E7%A7%81%E6%88%BF 图虫的私房妹子图
 - **CatchJianDanMeiziPic.py**：抓取 http://jandan.net/ooxx 煎蛋网妹子图
 - **CatchMWeiboPic.py**：抓取 新浪微博某博主的图片，可自行替换id以及爬取页数
+- **CatchHuaBanPic.py**：抓取花瓣网某个用户所有的画板里的图片
 
 ## 2.抓取数据
 
