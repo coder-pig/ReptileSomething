@@ -31,21 +31,15 @@ def init_https():
 
 
 # 2.根据url获得resp
-def get_resp(url, headers=None, proxy=None, read=True, timeout=15, ie_header=False):
+def get_resp(url, headers=None, proxy=None, read=True, timeout=15):
     if proxy is not None:
         handler = urllib.request.ProxyHandler({'https': proxy})
         opener = urllib.request.build_opener(handler)
         urllib.request.install_opener(opener)
     if headers is None:
-        if not ie_header:
-            headers = default_req_headers
-        else:
-            headers = ie_req_header
+        headers = default_req_headers
     else:
-        if not ie_header:
-            headers = merge_dicts(headers, default_req_headers)
-        else:
-            headers = merge_dicts(headers, ie_req_header)
+        headers = merge_dicts(headers, ie_req_header)
     req = urllib.request.Request(url, headers=headers)
     try:
         resp = urllib.request.urlopen(req, timeout=timeout)

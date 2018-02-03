@@ -36,6 +36,11 @@ json_headers = {
     'X-Requested-With': 'XMLHttpRequest'
 }
 
+# 修改请求头里的Referer
+referrer_header = {
+    'Referrer': 'Referer'
+}
+
 
 # 抓取用户所有的board
 def catch_all_boards(user_url):
@@ -105,7 +110,7 @@ def download_pic(pic_key, pic_dir):
     proxy_ip = coderpig.get_proxy_ip()
     coderpig.is_dir_existed(pic_download_dir)
     url = img_start_url + pic_key + img_end
-    resp = coderpig.get_resp(url, proxy=proxy_ip, ie_header=True)
+    resp = coderpig.get_resp(url, proxy=proxy_ip, headers=referrer_header)
     try:
         print("下载图片：" + url)
         pic_name = pic_key + ".jpg"

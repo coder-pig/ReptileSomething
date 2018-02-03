@@ -1,62 +1,121 @@
-import urllib.error
-import urllib.request
+import requests
 import os
 from bs4 import BeautifulSoup
-import ssl
+import re
+import time
 
 import coderpig
 
 save_dir = 'output/WeChat/'
 
 default_req_headers = {
-    'User-Agent': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0)'
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux) Gecko/20100101 Firefox/58.0'
 }
 
+video_parse_api = 'http://v.ranks.xin/video-parse.php'
+video_name_pattern = re.compile('.*/(.*mp4)\?.*')
+video_parse_headers = {
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux) Gecko/20100101 Firefox/58.0',
+    'Host': 'v.ranks.xin',
+    'Referer': 'http://v.ranks.xin/',
+    'X-Requested-With': 'XMLHttpRequest'
+}
 
-def get_pic(wechat_url):
-    req = urllib.request.Request(wechat_url, headers=default_req_headers)
+# 下载语音的基地址
+music_res_url = 'http://res.wx.qq.com/voice/getvoice'
+
+
+# 判断目录是否存在，不存在新建一个
+def is_dir_existed(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+# 获取所有的资源链接
+def get_resource_url(wechat_url):
     try:
-        resp = urllib.request.urlopen(req, timeout=15).read()
-        if resp is not None:
-            soup = BeautifulSoup(resp, "html.parser")
-            title = soup.find('h2', attrs={'rich_media_title'}).get_text().strip()
-            if title is not None:
-                save_path = save_dir + title + '/'
-                if not os.path.exists(save_path):
-                    os.makedirs(save_path)
-                imgs = soup.findAll('img', attrs={'class': ''})
-                if imgs is not None:
-                    for img in imgs:
-                        download_pic(img['data-src'], save_path)
-    except (OSError, urllib.error.HTTPError, urllib.error.URLError, Exception) as reason:
+        resp = requests.get(wechat_url)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        # 获取标题作为文件夹
+        title = soup.find('title').get_text().strip()
+        print(title)
+        res_save_path = save_dir
+        if title is not None:
+            res_save_path += '/' + title + '/'
+            is_dir_existed(res_save_path)
+        # 获取所有的图片链接
+        imgs = soup.findAll('img', attrs={'data-copyright': '0'})
+        if imgs is not None:
+            for img in imgs:
+                download_pic(img['data-src'], res_save_path)
+        # 获取视频url
+        videos = soup.findAll('iframe', attrs={'class': 'video_iframe'})
+        if videos is not None:
+            for video in videos:
+                download_video(video['data-src'], res_save_path)
+        # 获取音频文件id
+        musics = soup.findAll('mpvoice')
+        if musics is not None:
+            for music in musics:
+                download_music(music['voice_encode_fileid'], res_save_path)
+        print('==========《' + title + '》下载完成　==========')
+    except Exception as reason:
         print(str(reason))
-    return None
 
 
-# 下载图片的方法
-def download_pic(pic_url, dir_name):
-    correct_url = pic_url
-    if not pic_url.startswith('http'):
-        correct_url = 'http://' + pic_url
-    print("下载图片：" + correct_url)
-    req = urllib.request.Request(pic_url, headers=default_req_headers)
+# 下载微信图片
+def download_pic(url, path):
+    print("下载图片：" + url)
     try:
-        resp = urllib.request.urlopen(req, timeout=15).read()
+        pic_name = url.split("/")[-2]
+        fmt = url.split('=')[-1]  # 图片格式
+        resp = requests.get(url).content
+        with open(path + pic_name + "." + fmt, "wb+") as f:
+            f.write(resp)
+    except Exception as reason:
+        print(str(reason))
+
+
+# 下载微信视频
+def download_video(url, path):
+    # 把微信链接转换为可下载链接
+    print("开始解析视频链接：" + url)
+    video_resp = requests.get(video_parse_api, headers=video_parse_headers, params={'url': url})
+    if video_resp is not None:
+        video_url = video_resp.json()['data'][0]['url']
+        print("解析完成，开始下载视频:" + video_url)
+        try:
+            result = video_name_pattern.match(video_url)
+            if result is not None:
+                video_name = result.group(1)
+                resp = requests.get(video_url).content
+                if resp is not None:
+                    with open(path + video_name, "wb+") as f:
+                        f.write(resp)
+                        print("视频下载完成:" + video_name)
+        except Exception as reason:
+            print(str(reason))
+
+
+# 下载微信语音
+def download_music(file_id, path):
+    try:
+        resp = requests.get(music_res_url, params={'mediaid': file_id, 'voice_type': '1'})
         if resp is not None:
-            pic_type = correct_url.split("=")[-1]
-            pic_name = correct_url.split("/")[-2]
-            with open(dir_name + pic_name + '.' + pic_type, "wb+") as f:
-                f.write(resp)
-    except (OSError, urllib.error.HTTPError, urllib.error.URLError, Exception) as reason:
+            music_name = str(int(time.time())) + '.mp3'  # 使用当前时间戳作为音频名字
+            print("开始下载音频: " + music_name)
+            with open(path + music_name, "wb+") as f:
+                f.write(resp.content)
+                print("音频下载完成:" + music_name)
+    except Exception as reason:
         print(str(reason))
 
 
 if __name__ == '__main__':
-    ssl._create_default_https_context = ssl._create_unverified_context
     while True:
-        print("请粘贴需要提取图片的文章(输入Q回车或按Ctrl+C退出)")
-        url = input()
-        if url == 'Q':
-            break
+        print("请输入你要抓取的微信文章链接：(输出Q回车或者按Ctrl+C可以退出～)")
+        input_url = input()
+        if input_url == 'Q':
+            exit()
         else:
-            get_pic(url)
+            get_resource_url(input_url.strip())
