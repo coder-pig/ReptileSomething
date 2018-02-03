@@ -74,21 +74,22 @@ def catch_json_boards(url):
 
 
 # 获得boards页数据，提取key列表写入到文件里，并返回最后一个pid用于后续查询
-def get_boards_index_data(url):
+def get_boards_index_data(url, pic_save_dir):
     print(url)
     proxy_ip = coderpig.get_proxy_ip()
     resp = coderpig.get_resp(url, proxy=proxy_ip).decode('utf-8')
     result = pins_pattern.search(resp)
     json_dict = json.loads(result.group(1))
-    for item in json_dict:
-        coderpig.write_str_data(item['file']['key'], pin_keys_file)
-    # 返回最后一个pin_id
-    pin_id = json_dict[-1]['pin_id']
-    return pin_id
+    if len(json_dict) > 0:
+        for item in json_dict:
+            coderpig.write_str_data(pic_save_dir + ':' + item['file']['key'], pin_keys_file)
+        # 返回最后一个pin_id
+        pin_id = json_dict[-1]['pin_id']
+        return pin_id
 
 
 # 模拟Ajax请求更多数据
-def get_json_list(url):
+def get_json_list(url, pic_save_dir):
     proxy_ip = coderpig.get_proxy_ip()
     print("获取json：" + url)
     resp = coderpig.get_resp(url, headers=json_headers, proxy=proxy_ip).decode('utf-8')
@@ -101,7 +102,7 @@ def get_json_list(url):
             return None
         else:
             for item in pins:
-                coderpig.write_str_data(item['file']['key'], pin_keys_file)
+                coderpig.write_str_data(pic_save_dir + ':' + item['file']['key'], pin_keys_file)
             return pins[-1]['pin_id']
 
 
@@ -138,12 +139,14 @@ if __name__ == '__main__':
         coderpig.is_dir_existed(pic_save_dir)
         board_id = board.split(':')[1]
         board_url = base_url + 'boards/' + board_id + '/'
-        board_last_pin_id = get_boards_index_data(board_url)
+        board_last_pin_id = get_boards_index_data(board_url, pic_save_dir)
         board_json_url = board_url + pins_model_url
-        while True:
-            board_last_pin_id = get_json_list(pins_json_pattern.sub(str(board_last_pin_id), board_json_url))
-            if board_last_pin_id is None:
-                break
-        pic_url_list = coderpig.load_data(pin_keys_file)
-        for key in pic_url_list:
-            download_pic(key, pic_save_dir)
+        if board_last_pin_id is not None:
+            while True:
+                board_last_pin_id = get_json_list(pins_json_pattern.sub(str(board_last_pin_id), board_json_url),
+                                                  pic_save_dir)
+                if board_last_pin_id is None:
+                    break
+    pic_url_list = coderpig.load_data(pin_keys_file)
+    for key in pic_url_list:
+        download_pic(key.split(':')[1], key.split(':')[0])
