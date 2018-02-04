@@ -36,6 +36,7 @@
 - **CatchIdCardAreaCode.py**：抓取所有身份证前六位对应的行政区划代码(貌似失效了)
 - **CatchIdCardAreaCodeN.py**：抓取所有身份证前六位对应的行政区划代码
 - **CsdnLogin.py**：CSDN模拟登录保存Cookie并使用Cookie访问
+- **CatchWeChatRes.py**：抓取微信公众号文章里的所有图片，音频和视频
 
 ## 3.工具脚本
 

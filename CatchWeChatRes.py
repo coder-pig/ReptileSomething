@@ -44,7 +44,7 @@ def get_resource_url(wechat_url):
             res_save_path += '/' + title + '/'
             is_dir_existed(res_save_path)
         # 获取所有的图片链接
-        imgs = soup.findAll('img', attrs={'data-copyright': '0'})
+        imgs = soup.findAll('img', attrs={'class': ''})
         if imgs is not None:
             for img in imgs:
                 download_pic(img['data-src'], res_save_path)
@@ -74,6 +74,7 @@ def download_pic(url, path):
             f.write(resp)
     except Exception as reason:
         print(str(reason))
+        time.sleep(1)
 
 
 # 下载微信视频
