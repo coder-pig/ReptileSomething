@@ -1,6 +1,7 @@
 import os
 import random
 from bs4 import BeautifulSoup
+import threading as t
 
 # 大象代理ip列表
 dx_proxy_ip_list = []
@@ -16,6 +17,8 @@ user_agent_dict = {
               'Safari/537.36',
     'firefox': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0'
 }
+
+lock = t.Lock()
 
 
 # 1.按行读取文件里的内容添加到列表中返回
@@ -50,11 +53,12 @@ def write_list_data(content_list, file_path, mode="w+"):
 
 # 6.往文件写入内容(追加)
 def write_str_data(content, file_path, mode="a+"):
-    try:
-        with open(file_path, mode, encoding='utf-8') as f:
-            f.write(content + "\n", )
-    except OSError as reason:
-        print(str(reason))
+    with lock:
+        try:
+            with open(file_path, mode, encoding='utf-8') as f:
+                f.write(content + "\n", )
+        except OSError as reason:
+            print(str(reason))
 
 
 # 7.写入西刺代理

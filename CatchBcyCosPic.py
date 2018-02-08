@@ -3,6 +3,8 @@ import requests
 import coderpig_n as cpn
 import time
 import datetime
+import threading
+import queue
 from bs4 import BeautifulSoup
 
 pic_save_dir = 'output/Picture/BcyCos/'
@@ -26,6 +28,23 @@ pic_headers = {
 }
 start_date = '20150918'
 today_date = '20180208'
+
+
+# 抓取线程
+class CosSpider(threading.Thread):
+    def __init__(self, t_name, t_q):
+        self.queue = t_q
+        threading.Thread.__init__(self, name=t_name)
+
+    def run(self):
+        data = self.queue.get()
+        try:
+            get_toppost100({'type': 'lastday', 'date': data})
+            get_ajax_data({'p': '1', 'type': 'lastday', 'date': date})
+        except Exception as e:
+            print(str(e))
+        finally:
+            self.queue.task_done()
 
 
 # 构造生成一个从今天到20150918的列表
@@ -63,7 +82,7 @@ def get_toppost100(params):
                         cpn.write_str_data(name + "Θ" + img, pic_urls_file)
                 return None
         except Exception as e:
-            print(e)
+            pass
 
 
 # 获得今日热门的剩余部分
@@ -87,7 +106,7 @@ def get_ajax_data(data):
                         cpn.write_str_data(name + "Θ" + img, pic_urls_file)
                 return None
         except Exception as e:
-            print(e)
+            pass
 
 
 # 下载图片的方法
@@ -107,16 +126,26 @@ def download_pic(img):
                     f.write(resp.content)
                 return None
         except Exception as e:
-            print(e)
+            pass
 
 
 if __name__ == '__main__':
     cpn.is_dir_existed(pic_save_dir)
-    if not cpn.is_dir_existed(pic_urls_file, mkdir=False):
-        date_list = init_date_list(start_date, today_date)
-        for date in date_list:
-            get_toppost100({'type': 'lastday', 'date': date})
-            get_ajax_data({'p': '1', 'type': 'lastday', 'date': date})
-    pic_list = cpn.load_list_from_file(pic_urls_file)
-    for pic in pic_list:
-        download_pic(pic)
+    q = queue.Queue()
+    threads = []
+    date_list = init_date_list(start_date, today_date)
+    for date in date_list:
+        q.put(date)
+    for i in range(2000):
+        t = CosSpider(t_name='线程' + str(i), t_q=q)
+        t.start()
+        threads.append(t)
+    q.join()
+    for t in threads:
+        t.join()
+    print("解析完成！")
+
+    # pic_list = cpn.load_list_from_file(pic_urls_file)
+    # if threading.active_count() < 1:
+    #     for pic in pic_list:
+    #         download_pic(pic)
