@@ -27,27 +27,44 @@ pic_headers = {
     'User-Agent': cpn.user_agent_dict['chrome'],
 }
 start_date = '20150918'
-today_date = '20180208'
+today_date = '20150930'
+
+coser_q = queue.Queue()
+download_q = queue.Queue()
 
 
 # 抓取线程
 class CosSpider(threading.Thread):
-    def __init__(self, t_name, t_q):
-        self.queue = t_q
+    def __init__(self, t_name, func):
+        self.func = func
         threading.Thread.__init__(self, name=t_name)
 
     def run(self):
-        data = self.queue.get()
-        try:
-            get_toppost100({'type': 'lastday', 'date': data})
-            get_ajax_data({'p': '1', 'type': 'lastday', 'date': date})
-        except Exception as e:
-            print(str(e))
-        finally:
-            self.queue.task_done()
+        self.func()
 
 
-# 构造生成一个从今天到20150918的列表
+# 线程执行的方法
+def catch_coser():
+    global coser_q
+    while not coser_q.empty():
+        data = coser_q.get()
+        print("抓取：" + data)
+        get_toppost100({'type': 'lastday', 'date': data})
+        get_ajax_data({'p': '1', 'type': 'lastday', 'date': data})
+        coser_q.task_done()
+
+
+# 线程执行的方法
+def download_coser():
+    global download_q
+    while not download_q.empty():
+        data = download_q.get()
+        print("下载图片：" + data)
+        download_pic(data)
+        download_q.task_done()
+
+
+# 构造生成一个从20150918到今天的日期
 def init_date_list(begin_date, end_date):
     date_list = []
     begin_date = datetime.datetime.strptime(begin_date, "%Y%m%d")
@@ -82,7 +99,7 @@ def get_toppost100(params):
                         cpn.write_str_data(name + "Θ" + img, pic_urls_file)
                 return None
         except Exception as e:
-            pass
+            print(threading.current_thread().name + "~" + str(e))
 
 
 # 获得今日热门的剩余部分
@@ -106,7 +123,10 @@ def get_ajax_data(data):
                         cpn.write_str_data(name + "Θ" + img, pic_urls_file)
                 return None
         except Exception as e:
-            pass
+            print(threading.current_thread().name + "~" + str(e))
+
+
+# 下载图片线程
 
 
 # 下载图片的方法
@@ -131,21 +151,31 @@ def download_pic(img):
 
 if __name__ == '__main__':
     cpn.is_dir_existed(pic_save_dir)
-    q = queue.Queue()
+    if not cpn.is_dir_existed(pic_urls_file, mkdir=False):
+        threads = []
+        date_list = init_date_list(start_date, today_date)
+        for date in date_list:
+            coser_q.put(date)
+        for i in range(0, len(date_list)):
+            t = CosSpider(t_name='线程' + str(i), func=catch_coser)
+            t.daemon = True
+            t.start()
+            threads.append(t)
+        coser_q.join()
+        for t in threads:
+            t.join()
+        print("所有网页解析完毕～")
+    print("开始下载图片")
+    pic_list = cpn.load_list_from_file(pic_urls_file)
     threads = []
-    date_list = init_date_list(start_date, today_date)
-    for date in date_list:
-        q.put(date)
-    for i in range(2000):
-        t = CosSpider(t_name='线程' + str(i), t_q=q)
+    for pic in pic_list:
+        download_q.put(pic)
+    for i in range(0, len(pic_list)):
+        t = CosSpider(t_name='线程' + str(i), func=download_coser)
+        t.daemon = True
         t.start()
         threads.append(t)
-    q.join()
+    download_q.join()
     for t in threads:
         t.join()
-    print("解析完成！")
-
-    # pic_list = cpn.load_list_from_file(pic_urls_file)
-    # if threading.active_count() < 1:
-    #     for pic in pic_list:
-    #         download_pic(pic)
+    print("图片下载完毕")
