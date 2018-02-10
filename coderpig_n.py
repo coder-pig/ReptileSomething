@@ -11,6 +11,10 @@ dx_proxy_ip_file = "dx_proxy_ip.txt"
 xc_proxy_ip_list = []
 # 西刺免费ip代理文件
 xc_proxy_ip_file = "xc_proxy_ip.txt"
+# 代理ip文件
+proxy_ip_file = "proxy_ip.txt"
+# 代理ip列表
+proxy_ip_list = []
 # 常用User-Agent字典
 user_agent_dict = {
     'chrome': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 '
@@ -84,6 +88,20 @@ def get_xc_proxy_ip():
     list_len = len(xc_proxy_ip_list)
     if not list_len == 0:
         return xc_proxy_ip_list[random.randint(0, list_len - 1)]
+
+
+# 获取代理
+def get_proxy_ip():
+    global proxy_ip_list
+    if len(proxy_ip_list) == 0:
+        proxy_ip_list = load_list_from_file(proxy_ip_file)
+    list_len = len(proxy_ip_list)
+    if not list_len == 0:
+        ip = proxy_ip_list[random.randint(0, list_len - 1)]
+        return {
+            'http': 'http://' + ip,
+            'https': 'https://' + ip
+        }
 
 
 # 10.获得一个BeautifulSoup对象(默认在线，可以加载本地html)

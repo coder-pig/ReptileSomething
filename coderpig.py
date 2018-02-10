@@ -130,7 +130,7 @@ def get_proxy_ip():
     global proxy_ip_list
     if len(proxy_ip_list) == 0:
         proxy_ip_list = load_data(proxy_ip_file)
-    return proxy_ip_list[random.randint(0, 250)]
+    return proxy_ip_list[random.randint(0, 100)]
 
 
 # 11.合并字典
