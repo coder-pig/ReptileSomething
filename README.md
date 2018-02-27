@@ -29,6 +29,7 @@
 - **CatchMWeiboPic.py**：抓取 新浪微博某博主的图片，可自行替换id以及爬取页数
 - **CatchHuaBanPic.py**：抓取花瓣网某个用户所有的画板里的图片
 - **CatchBcyCosPic.py**：抓取半次元所有的每日热门Coser图片
+- **CatchTieBaPic.py**:抓取百度贴吧某个帖子里所有的图片(多页)
 
 ## 2.抓取数据
 
