@@ -15,4 +15,12 @@ GANK_PIC_URL_FILE_NAME = "gank_pic_urls.txt"
 GANK_PIC_URL_FILE_PATH = os.getcwd() + "/out/file/Gank/"
 GANK_PIC_SAVE_PATH = os.getcwd() + "/out/Picture/Gank/"
 
+# 涨姿势福利社专题妹子图配置
+ZZS_FLS_MZT_URL = "http://www.zhangzishi.cc/category/welfare/page/"
+ZZS_FLS_MZT_URL_FILE_NAME = "zzs_fls_urls.txt"
+ZZS_FLS_MZT_URL_FILE_PATH = os.getcwd() + "/out/file/ZZS/"
+ZZS_FLS_MZT_SAVE_PATH = os.getcwd() + "/out/Picture/ZZS/"
+
+
+
 

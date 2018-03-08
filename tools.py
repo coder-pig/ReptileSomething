@@ -2,6 +2,7 @@ import os
 import random
 import threading as t
 from bs4 import BeautifulSoup
+import requests
 
 # 代理ip文件
 proxy_ip_file = "proxy_ip.txt"
@@ -58,3 +59,4 @@ def write_str_data(content, file_path, mode="a+"):
                 f.write(content + "\n", )
         except OSError as reason:
             print(str(reason))
+
