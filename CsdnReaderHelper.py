@@ -1,19 +1,19 @@
 # CSDN刷阅读量脚本
-import coderpig_n as cpn
 import requests
 import random
 import threading as t
+import tools
 
-list_url = "http://blog.csdn.net/coder_pig?viewmode=list"
-content_url = "http://blog.csdn.net/coder_pig?viewmode=contents"
+list_url = "http://blog.csdn.net/coder_pig?viewmode=contents"
 base_url = "http://blog.csdn.net"
-base_article_list = "http://blog.csdn.net/zpj779878443/article/list/"
+base_article_list = "http://blog.csdn.net/coder_pig/article/list/"
 articles_file = 'csdn_articles_file.txt'
 read_count = 0
 
 headers = {
     'Host': 'blog.csdn.net',
-    'User-Agent': cpn.user_agent_dict['chrome'],
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 '
+                  'Safari/537.36 '
 }
 
 
@@ -22,10 +22,9 @@ def get_page_count():
     try:
         resp = requests.get(list_url, headers=headers, timeout=5)
         if resp is not None:
-            soup = cpn.get_bs(resp.text)
-            div = soup.find('div', attrs={'id': 'papelist'})
-            page_count = (div.findAll('a')[-1]['href']).split('/')[-1]
-            print("解析获得文章页数：" + page_count)
+            soup = tools.get_bs(resp.text)
+            page_count = int(soup.select('li.page-item')[-2].text)
+            print("解析获得文章页数：" + str(page_count))
             return page_count
     except Exception as e:
         print(str(e))
@@ -37,11 +36,10 @@ def get_article_url(url):
         resp = requests.get(url, headers=headers, timeout=5)
         if resp is not None:
             print("解析：" + resp.request.url)
-            soup = cpn.get_bs(resp.text)
-            div = soup.find('div', attrs={'id': 'article_list'})
-            spans = div.findAll('span', attrs={'class': 'link_title'})
-            for span in spans:
-                cpn.write_str_data(base_url + span.find('a')['href'], articles_file)
+            soup = tools.get_bs(resp.text)
+            hrefs = soup.select('span.link_title a')
+            for a in hrefs:
+                tools.write_str_data('http:' + a['href'],articles_file)
             return None
     except Exception as e:
         print(str(e))
@@ -50,7 +48,7 @@ def get_article_url(url):
 # 访问网页
 def read_article_url(url):
     while True:
-        proxy_ip = cpn.get_proxy_ip()
+        proxy_ip = tools.get_proxy_ip()
         try:
             resp = requests.get(url, headers=headers, proxies=proxy_ip, timeout=5)
             if resp is not None and resp.status_code == 200:
@@ -80,15 +78,15 @@ def reading():
 
 if __name__ == '__main__':
     print("判断文章链接文件是否存在：")
-    if not cpn.is_dir_existed(articles_file, mkdir=False):
+    if not tools.is_dir_existed(articles_file, mkdir=False):
         print("链接文件不存在，抓取链接...")
         count = int(get_page_count())
         for i in range(1, count + 1):
-            get_article_url(base_article_list + str(i))
+            get_article_url(base_article_list + str(i) + '?viewmode=contents')
     else:
         print("链接文件存在")
     print("加载文章链接文件...")
-    url_list = cpn.load_list_from_file(articles_file)
+    url_list = tools.load_list_from_file(articles_file)
     for i in range(100):
         reader = Reader("线程" + str(i), reading)
         reader.start()

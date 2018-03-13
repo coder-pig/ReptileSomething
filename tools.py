@@ -59,4 +59,3 @@ def write_str_data(content, file_path, mode="a+"):
                 f.write(content + "\n", )
         except OSError as reason:
             print(str(reason))
-
