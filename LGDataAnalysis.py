@@ -9,8 +9,14 @@ import re
 import random
 import time
 import html
+import matplotlib.pyplot as plt
+import numpy as np
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from collections import Counter
+from scipy.misc import imread
 
 max_page = 1
+result_save_file = 'result.csv'
 
 # Ajax加载url
 ajax_url = "https://www.lagou.com/jobs/positionAjax.json?"
@@ -83,19 +89,91 @@ def fetch_data(page):
                                       data['latitude'],
                                       html.unescape(data['companyFullName'])))
                     result = pd.DataFrame(data_list)
-                    if page == 1:
-                        result.to_csv('result.csv', header=csv_headers, index=False, mode='a+')
-                    else:
-                        result.to_csv('result.csv', header=False, index=False, mode='a+')
+                if page == 1:
+                    result.to_csv(result_save_file, header=csv_headers, index=False, mode='a+')
+                else:
+                    result.to_csv(result_save_file, header=False, index=False, mode='a+')
                 return None
         except Exception as e:
             print(e)
 
 
+# 生成词云文件
+def generate_wc(content):
+    path = r'fzzqhj.TTF'
+    bg_pic = imread('2.jpg')
+    image_colors = ImageColorGenerator(bg_pic)
+    wc = WordCloud(font_path=path,
+                   background_color="black",
+                   mask=bg_pic,
+                   color_func=image_colors,
+                   margin=2,
+                   random_state=42,
+                   width=1000,
+                   height=860)
+    wc.generate_from_frequencies(content)
+    wc.to_file("wd.jpg")
+
+
 # 处理数据
 if __name__ == '__main__':
-    fetch_data(1)
-    print(max_page)
-    for cur_page in range(45, max_page + 1):
-        time.sleep(random.randint(2, 3))
-        fetch_data(cur_page)
+    if not t.is_dir_existed(result_save_file, mkdir=False):
+        fetch_data(1)
+        for cur_page in range(2, max_page + 1):
+            time.sleep(random.randint(2, 3))
+            fetch_data(cur_page)
+    else:
+        data = pd.read_csv(result_save_file)
+        # 1.工作年限直方图
+        plt.figure(1)
+        data['工作年限'].value_counts().plot(kind='bar', rot=0)
+        plt.title("工作经验直方图")
+        plt.xlabel("年限/年")
+        plt.ylabel("公司/个")
+        plt.savefig('result1.jpg')
+        plt.close(1)
+        # 2.工作年限饼图
+        plt.figure(2)
+        data['工作年限'].value_counts().plot(kind='pie', autopct='%1.1f%%', explode=np.linspace(0, 0.75, 6))
+        plt.title("工作经验饼图")
+        plt.subplots_adjust(left=0.22, right=0.74, wspace=0.20, hspace=0.20,
+                            bottom=0.17, top=0.84)
+        plt.savefig('result2.jpg')
+        plt.close(2)
+        # 3.学历饼图
+        plt.figure(3)
+        data['学历'].value_counts().plot(kind='pie', autopct='%1.1f%%', explode=(0, 0.1, 0.2))
+        plt.title("学历饼图")
+        plt.subplots_adjust(left=0.22, right=0.74, wspace=0.20, hspace=0.20,
+                            bottom=0.17, top=0.84)
+        plt.savefig('result3.jpg')
+        plt.close(3)
+        # 4.薪资饼图(先去掉后部分的最大工资，过滤掉kK以上词汇，获取索引按照整数生序排列)
+        plt.figure(4)
+        salary = data['薪资'].str.split('-').str.get(0).str.replace('k|K|以上', "").value_counts()
+        salary_index = list(salary.index)
+        salary_index.sort(key=lambda x: int(x))
+        final_salary = salary.reindex(salary_index)
+        plt.title("薪资直方图")
+        final_salary.plot(kind='bar', rot=0)
+        plt.xlabel("薪资/K")
+        plt.ylabel("公司/个")
+        plt.savefig('result4.jpg')
+        plt.close(4)
+        # 5.融资状态
+        plt.figure(5)
+        data['融资状态'].value_counts().plot(kind='pie', autopct='%1.1f%%')
+        plt.title("融资状态饼图")
+        plt.subplots_adjust(left=0.22, right=0.74, wspace=0.20, hspace=0.20,
+                            bottom=0.17, top=0.84)
+        plt.savefig('result5.jpg')
+        plt.close(5)
+        # 6.行业领域
+        industry_field_list = []
+        for industry_field in data['行业领域']:
+            for field in industry_field.strip().replace(" ", ",").replace("、", ",").split(','):
+                industry_field_list.append(field)
+        c = dict(Counter(industry_field_list))
+        c.pop('')
+        print(c)
+        generate_wc(c)
