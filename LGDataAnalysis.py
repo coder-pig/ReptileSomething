@@ -99,20 +99,23 @@ def fetch_data(page):
 
 
 # 生成词云文件
-def generate_wc(content):
-    path = r'fzzqhj.TTF'
-    bg_pic = imread('2.jpg')
+def generate_wc(content, file_name):
+    path = r'wryh.ttf'
+    bg_pic = imread('1.jpg')
     image_colors = ImageColorGenerator(bg_pic)
     wc = WordCloud(font_path=path,
-                   background_color="black",
+                   background_color="white",
                    mask=bg_pic,
                    color_func=image_colors,
                    margin=2,
-                   random_state=42,
                    width=1000,
+                   max_font_size=60,
+                   min_font_size=10,
+                   max_words=2000,
+                   scale=3,
                    height=860)
     wc.generate_from_frequencies(content)
-    wc.to_file("wd.jpg")
+    wc.to_file(file_name)
 
 
 # 处理数据
@@ -175,5 +178,14 @@ if __name__ == '__main__':
                 industry_field_list.append(field)
         c = dict(Counter(industry_field_list))
         c.pop('')
+        generate_wc(c, "wd_1.jpg")
+        # 7.公司优势
+        advantage_list = []
+        for advantage_field in data['公司优势']:
+            for field in advantage_field.strip().replace(" ", ",").replace("、", ",").replace("，", ",").replace("+", ",") \
+                    .split(','):
+                industry_field_list.append(field)
+        c = dict(Counter(industry_field_list))
+        c.pop('')
+        generate_wc(c, "wd_2.jpg")
         print(c)
-        generate_wc(c)
