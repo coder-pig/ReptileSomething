@@ -1,10 +1,11 @@
 # 抓取：https://www.aitaotu.com/taotu/ 爱套图里的美女图
 import re
 import coderpig
+import config as c
 
 base_url = 'https://www.aitaotu.com'
 taotu_url = base_url + '/taotu'
-pic_save_path = "output/Picture/AiTaoTu/"
+pic_save_path = c.outputs_pictures_path + "AiTaoTu/"
 moye_pattern = re.compile(r'^.*\w(.{2}).html$')
 
 

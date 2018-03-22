@@ -2,10 +2,11 @@ import os
 import random
 import threading as t
 from bs4 import BeautifulSoup
-import requests
+import sys
+import config
 
 # 代理ip文件
-proxy_ip_file = "proxy_ip.txt"
+proxy_ip_file = config.code_tools_path + "proxy_ip.txt"
 proxy_ip_list = []
 lock = t.RLock()
 
@@ -23,7 +24,7 @@ def load_list_from_file(file_path):
 # 2.随缘获得一枚代理ip
 def get_proxy_ip():
     global proxy_ip_list
-    if len(proxy_ip_list) == 0:
+    if proxy_ip_list is None and len(proxy_ip_list) == 0:
         proxy_ip_list = load_list_from_file(proxy_ip_file)
     list_len = len(proxy_ip_list)
     if not list_len == 0:

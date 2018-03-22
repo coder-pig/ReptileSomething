@@ -1,26 +1,41 @@
-# 配置文件
 import os
-import urllib.parse
-
-# 常用User-Agent字典
-USER_AGENT_DICT = {
-    'chrome': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 '
-              'Safari/537.36',
-    'firefox': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0'
-}
-
-# Gank 福利图配置
-GANK_PIC_API = "http://gank.io/api/data/" + urllib.parse.quote("福利") + "/50/"
-GANK_PIC_URL_FILE_NAME = "gank_pic_urls.txt"
-GANK_PIC_URL_FILE_PATH = os.getcwd() + "/out/file/Gank/"
-GANK_PIC_SAVE_PATH = os.getcwd() + "/out/Picture/Gank/"
-
-# 涨姿势福利社专题妹子图配置
-ZZS_FLS_MZT_URL = "http://www.zhangzishi.cc/category/welfare/page/"
-ZZS_FLS_MZT_URL_FILE_NAME = "zzs_fls_urls.txt"
-ZZS_FLS_MZT_URL_FILE_PATH = os.getcwd() + "/out/file/ZZS/"
-ZZS_FLS_MZT_SAVE_PATH = os.getcwd() + "/out/Picture/ZZS/"
 
 
+"""
+    相关配置
+    1.对应的文件输出路径
+"""
+# 工程目录
+root_path = os.path.abspath(os.path.join(os.getcwd(), "../../"))
 
+# 生成文件目录
+build_path = root_path + "/build/"
+outputs_path = build_path + "outputs/"
+outputs_documents_path = outputs_path + "documents/"
+outputs_logs_path = outputs_path + "logs/"
+outputs_pictures_path = outputs_path + "pictures/"
+outputs_video_path = outputs_path + "videos/"
+
+# res 资源目录
+res_path = root_path + "/res/"
+res_documents = res_path + "documents/"
+res_pictures = res_path + "pictures/"
+
+# 代码目录
+code_path = root_path + "/code/"
+code_meizi_path = code_path + "meizi/"
+code_tools_path = code_path + "tools/"
+code_analysis_path = code_path + "analysis/"
+
+if __name__ == '__main__':
+    print(root_path)
+    print(build_path)
+    print(outputs_path)
+    print(outputs_documents_path)
+    print(outputs_logs_path)
+    print(outputs_pictures_path)
+    print(outputs_video_path)
+    print(res_path)
+    print(res_documents)
+    print(res_pictures)
 

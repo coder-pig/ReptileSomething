@@ -93,7 +93,7 @@ def get_xc_proxy_ip():
 # 获取代理
 def get_proxy_ip():
     global proxy_ip_list
-    if len(proxy_ip_list) == 0:
+    if proxy_ip_list is None and len(proxy_ip_list) == 0:
         proxy_ip_list = load_list_from_file(proxy_ip_file)
     list_len = len(proxy_ip_list)
     if not list_len == 0:
