@@ -1,22 +1,20 @@
 # 拉勾网Android招聘数据分析
-import urllib.parse
-import requests
-import xlwt
-import xlrd
-import tools as t
-import pandas as pd
-import geopandas as gp
-import re
-import random
-import time
 import html
+import random
+import re
+import time
+import urllib.parse
+from collections import Counter
+
 import matplotlib.pyplot as plt
 import numpy as np
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
-from collections import Counter
+import pandas as pd
+import requests
 from scipy.misc import imread
+from wordcloud import WordCloud, ImageColorGenerator
+
 import config as c
-from shapely.geometry import Point, Polygon
+import tools as t
 
 max_page = 1
 result_save_file = c.outputs_logs_path + 'result.csv'
