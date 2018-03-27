@@ -1,19 +1,13 @@
-def binary_search(num, list):
-    low = 0
-    high = len(list) - 1
-    while (low <= high):
-        middle = int((low + high) / 2)
-        if list[middle] > num:
-            high = middle - 1
-        elif list[middle] < num:
-            low = middle + 1
-        else:
-            return middle
-    return -1
+from pyecharts import WordCloud
 
-
-if __name__ == '__main__':
-    list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    num = 1
-    location = binary_search(num, list1)
-    print(location)
+name = [
+    'Sam S Club', 'Macys', 'Amy Schumer', 'Jurassic World', 'Charter Communications',
+    'Chick Fil A', 'Planet Fitness', 'Pitch Perfect', 'Express', 'Home', 'Johnny Depp',
+    'Lena Dunham', 'Lewis Hamilton', 'KXAN', 'Mary Ellen Mark', 'Farrah Abraham',
+    'Rita Ora', 'Serena Williams', 'NCAA baseball tournament', 'Point Break']
+value = [
+    10000, 6181, 4386, 4055, 2467, 2244, 1898, 1484, 1112,
+    965, 847, 582, 555, 550, 462, 366, 360, 282, 273, 265]
+wordcloud = WordCloud(width=1300, height=620)
+wordcloud.add("", name, value, word_size_range=[20, 100])
+wordcloud.render()
