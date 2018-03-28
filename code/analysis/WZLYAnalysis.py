@@ -1,12 +1,15 @@
+import random
+import re
+import time
+from collections import Counter
+
+import jieba as jb
+import pandas as pd
 import requests as rq
+from pyecharts import Bar, Pie, Funnel, Radar, Geo, WordCloud
+
 import config as c
 import tools as t
-import pandas as pd
-import numpy as np
-import time
-import random
-import sys
-from pyecharts import Bar, Pie, Funnel, Radar
 
 result_save_file = c.outputs_logs_path + 'wzly.csv'
 
@@ -41,6 +44,8 @@ age_interval = [
     ('18-30', 8000), ('26-30', 8000), ('31-40', 8000),
     ('41-50', 8000), ('50以上', 8000),
 ]  # 学历范围
+
+word_pattern = re.compile('[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？“”、~@#￥%……&*（）(\d+)]+')
 
 
 # 获取每页交友信息
@@ -112,6 +117,26 @@ def analysis_age(data):
     return age_count
 
 
+# 分析城市分布
+def analysis_city(data):
+    city_data = data['城市'].value_counts()
+    city_list = []
+    for city in range(0, len(city_data)):
+        if city_data.values[city] > 10:
+            city_list.append((city_data.index[city], city_data.values[city]))
+    return city_list
+
+
+# 词频分布
+def analysis_word(data):
+    word_data = data['交友宣言'].value_counts()
+    word_list = []
+    for word in range(0, len(word_data)):
+        if word_data.values[word] == 1:
+            word_list.append(word_data.index[word])
+    return word_list
+
+
 # 绘制身高分布柱状图
 def draw_height_bar(data):
     bar = Bar("妹子身高分布柱状图")
@@ -144,6 +169,24 @@ def draw_age_radar(data):
     return radar
 
 
+# 城市分布地图
+def draw_city_geo(data):
+    geo = Geo("全国妹子分布城市", "data about beauty", title_color="#fff",
+              title_pos="center", width=1200,
+              height=600, background_color='#404a59')
+    attr, value = geo.cast(data)
+    geo.add("", attr, value, visual_range=[10, 2500], visual_text_color="#fff",
+            symbol_size=15, is_visualmap=True)
+    return geo
+
+
+# 交友宣言词云
+def draw_word_wc(name, count):
+    wc = WordCloud(width=1300, height=620)
+    wc.add("", name, count, word_size_range=[20, 100], shape='diamond')
+    wc.render()
+
+
 if __name__ == '__main__':
     if not t.is_dir_existed(result_save_file, mkdir=False):
         for i in range(1, 777):
@@ -151,5 +194,30 @@ if __name__ == '__main__':
             fetch_data(i)
     else:
         raw_data = pd.read_csv(result_save_file)
-        age_result_list = [analysis_age(raw_data)]
-        draw_age_radar(age_result_list)
+        word_result = word_pattern.sub("", ''.join(analysis_word(raw_data)))
+        words = [word for word in jb.cut(word_result, cut_all=False) if len(word) >= 3]
+        exclude_words = [
+            '一辈子', '不相离', '另一半', '业余时间', '性格特点', '茫茫人海', '男朋友', '找对象',
+            '谈恋爱', '有时候', '女孩子', '哈哈哈', '加微信', '兴趣爱好',
+            '是因为', '不良嗜好', '男孩子', '为什么', '没关系', '不介意',
+            '没什么', '交朋友', '大大咧咧', '大富大贵', '联系方式', '打招呼',
+            '有意者', '晚一点', '哈哈哈', '以上学历', '是不是', '给我发',
+            '不怎么', '第一次', '越来越', '遇一人', '择一人', '无数次',
+            '符合条件', '什么样', '全世界', '比较简单', '浪费时间', '不知不觉',
+            '有没有', '寻寻觅觅', '自我介绍', '请勿打扰', '差不多', '不在乎', '看起来',
+            '一点点', '陪你到', '这么久', '看清楚', '身高体重', '比较慢', '比较忙',
+            '多一点', '小女生', '土生土长', '发消息', '最合适'
+        ]
+        for i in range(0, len(words)):
+            if words[i] in exclude_words:
+                words[i] = None
+        filter_list = list(filter(lambda t: t is not None, words))
+        data = r' '.join(filter_list)
+        c = Counter(filter_list)
+        word_name = []  # 词
+        word_count = []  # 词频
+        for word_freq in c.most_common(100):
+            word, freq = word_freq
+            word_name.append(word)
+            word_count.append(freq)
+        draw_word_wc(word_name, word_count)
