@@ -26,6 +26,7 @@ code_path = root_path + "/code/"
 code_meizi_path = code_path + "meizi/"
 code_tools_path = code_path + "tools/"
 code_analysis_path = code_path + "analysis/"
+code_threading_path = code_path + "threading/"
 
 if __name__ == '__main__':
     print(root_path)

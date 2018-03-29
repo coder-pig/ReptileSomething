@@ -15,7 +15,7 @@
 2018.3.22 花了一下午整理了一下结构：
 
 ```
-├── build (执行相关目录)
+├── build(执行相关目录)
 │   └── outputs (生成文件目录)
 │       ├── documents (生成文档目录)
 │       ├── logs (生成日志目录，中途过渡用)
@@ -23,11 +23,10 @@
 │       └── videos (生成非图片类资源目录)
 ├── code (代码存放目录)
 │   ├── analysis (数据分析类)
-        ├── .ipynb_checkpoints(Jupyter备份文件，不要动)
 │   │   ├── CatchWorkingReport.py (抓取2018年政府报告高频词做词云)
 │   │   ├── LGDataAnalysis.py (拉取拉勾网2018年Android岗位相关做数据分析)
-        ├── wzly.ipynb(Jupyter Notebook分析我主良缘妹子交友信息)
-        ├── WZLYAnalysis.py(抓取我主良缘妹子交友数据，并做数据分析)
+│   │   ├── WZLYAnalysis.py (Jupyter Notebook分析我主良缘妹子交友信息)
+│   │   └── WZLY.ipynb (抓取我主良缘妹子交友数据，并做数据分析)
 │   ├── meizi (图片抓取类)
 │   │   ├── CatchAiTaoTuPic.py (抓取爱套图网妹子图)
 │   │   ├── CatchBcyCosPic.py (抓取半次元Cos图)
@@ -39,16 +38,25 @@
 │   │   ├── FuliShePicCatch.py (抓取福利社妹子图)
 │   │   ├── GankPicCatch.py (抓取GankIO妹子图)
 │   │   └── win400MeituCatch.py (抓取win400妹子图)
-│   └── tools (工具类)
-│       ├── CatchCityCode.py (抓取城市编码)
-│       ├── CatchDoubanMusic250.py (抓取豆瓣音乐250写入Excel)
-│       ├── CatchIdCardAreaCodeN.py (抓取身份证前6位地区码，新)
-│       ├── CatchIdCardAreaCode.py (抓取身份证前6位地区码，旧)
-│       ├── CatchPostCode.py (抓取邮政编码)
-│       ├── CatchWeChatRes.py (抓取某篇微信文章里所有的图片，语音，视频)
-│       ├── CatchXiCiProxyIPs.py (抓取西刺代理中速度较快的代理ip)
-│       ├── CsdnLogin.py (CSDN模拟登录)
-│       └── CsdnReaderHelper.py (刷CSDN博客访问量脚本)
+│   ├── threading (多线程相关)
+│   │   ├── BarrierTest.py (栅栏Barrier使用示例)
+│   │   ├── ConditionTest.py (Condition条件变量使用示例，实现简单的生产者与消费者)
+│   │   ├── EventTest.py (通用的条件变量Event 使用示例)
+│   │   ├── lockTest.py (Lock指令锁的使用示例)
+│   │   ├── queueTest.py (队列queue使用示例)
+│   │   ├── SemaphoreTest.py (信号量Semaphore的使用示例)
+│   │   ├── threadlocalTest.py (线程局部变量使用示例)
+│   │   └── TimerTest.py (定时器Timer使用示例)
+│   └── tools (工具类)
+│       ├── CatchCityCode.py (抓取城市编码)
+│       ├── CatchDoubanMusic250.py (抓取豆瓣音乐250写入Excel)
+│       ├── CatchIdCardAreaCodeN.py (抓取身份证前6位地区码，新)
+│       ├── CatchIdCardAreaCode.py (抓取身份证前6位地区码，旧)
+│       ├── CatchPostCode.py (抓取邮政编码)
+│       ├── CatchWeChatRes.py (抓取某篇微信文章里所有的图片，语音，视频)
+│       ├── CatchXiCiProxyIPs.py (抓取西刺代理中速度较快的代理ip)
+│       ├── CsdnLogin.py (CSDN模拟登录)
+│       └── CsdnReaderHelper.py (刷CSDN博客访问量脚本)
 ├── coderpig_n.py (自己写简易工具模块，版本2)
 ├── coderpig.py (自己写简易工具模块，版本1)
 ├── config.py (配置文件，目前主要用于指定输出路径)
@@ -56,11 +64,12 @@
 ├── proxy_ip.txt (代理ip列表文件)
 ├── README.md
 ├── res (代码运行所需的资源，比如字体，图片等等)
-│   ├── documents
-│   └── pictures
+│   ├── documents
+│   └── pictures
 └── tools.py (自己写简易工具模块，版本3)
 
 ```
+
 
 ## 项目说明
 
