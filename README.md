@@ -57,6 +57,7 @@
 │       ├── CatchXiCiProxyIPs.py (抓取西刺代理中速度较快的代理ip)
 │       ├── CsdnLogin.py (CSDN模拟登录)
 │       └── CsdnReaderHelper.py (刷CSDN博客访问量脚本)
+│       └── WechatXYZHelper.py (基于itchat的机器人，小宇宙新闻群发，自动通过好友申请，自动回复)
 ├── coderpig_n.py (自己写简易工具模块，版本2)
 ├── coderpig.py (自己写简易工具模块，版本1)
 ├── config.py (配置文件，目前主要用于指定输出路径)

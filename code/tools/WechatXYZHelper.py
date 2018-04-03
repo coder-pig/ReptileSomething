@@ -30,7 +30,7 @@ def xyz_reply(msg):
     result = xyz_compile.search(msg['Content'])
 
     if result is not None:
-        if result.group() is not None and msg['ActualNickName'] == u'小宇宙':
+        if result.group() is not None:
             for group in group_name:
                 itchat.send('%s' % (msg['Content']), toUserName=group)
 
@@ -51,7 +51,7 @@ def loop_send():
 def deal_with_friend(msg):
     if add_friend_compile.search(msg['Content']) is not None:
         itchat.add_friend(**msg['Text'])  # 自动将新好友的消息录入，不需要重载通讯录
-        itchat.send_msg('嘤嘤嘤，我是智障机器人小Pig，\n很高兴认识你，回复关键字:\n\n 加群，博客，公众号，打赏 \n\n 来继续我们的摔跤♂故事！',
+        itchat.send_msg('嘤嘤嘤，我是智障机器人小Pig，\n很高兴认识你，回复关键字:\n\n 加群，博客，Github，公众号，打赏 \n\n 来继续我们的摔跤♂故事！',
                         msg['RecommendInfo']['UserName'])
         itchat.send_image('welcome.png', msg['RecommendInfo']['UserName'])
 
@@ -69,6 +69,8 @@ def deal_with_msg(msg):
                                         [{'UserName': msg['FromUserName']}], useInvitation=True)
     elif text == u'博客':
         return 'coder-pig的个人主页-掘金：https://juejin.im/user/570afb741ea493005de84da3'
+    elif text == u'Github':
+        return 'https://github.com/coder-pig'
     elif text == u'公众号':
         itchat.send_image('gzh.jpg', msg['FromUserName'])
     elif text == u'打赏':
