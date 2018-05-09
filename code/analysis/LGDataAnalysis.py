@@ -16,7 +16,7 @@ import config as c
 import tools as t
 
 max_page = 1
-result_save_file = c.outputs_logs_path + 'result.csv'
+result_save_file = c.outputs_logs_path + 'result1.csv'
 pic_save_path = c.outputs_pictures_path + 'LaGou/'
 default_font = c.res_documents + 'wryh.ttf'  # 生成词云用的默认字体
 default_mask = c.res_pictures + 'default_mask.jpg'  # 默认遮罩图片
@@ -25,10 +25,10 @@ default_mask = c.res_pictures + 'default_mask.jpg'  # 默认遮罩图片
 ajax_url = "https://www.lagou.com/jobs/positionAjax.json?"
 
 # url拼接参数
-request_params = {'needAddtionalResult': 'false'}
+request_params = {'px': 'default', 'city': '深圳', 'needAddtionalResult': 'false', 'isSchoolJob': '0'}
 
 # post提交参数
-form_data = {'first': 'false', 'pn': '1', 'kd': 'Python'}
+form_data = {'first': 'false', 'pn': '1', 'kd': '前端'}
 
 # 获得页数的正则
 page_pattern = re.compile('"totalCount":(\d*),', re.S)
@@ -67,7 +67,7 @@ def fetch_data(page):
             form_data['pn'] = page
             print("抓取第：" + str(page) + "页!")
             # 随缘休息5-15s，避免因为访问过于频繁导致ip被封
-            time.sleep(random.randint(5, 15))
+            time.sleep(random.randint(3, 8))
             resp = requests.post(url=fetch_url, data=form_data, headers=ajax_headers)
             if resp.status_code == 200:
                 if page == 1:
@@ -179,7 +179,7 @@ def data_analysis(data):
     plt.close(4)
     # 饼图
     plt.figure(5)
-    data['工作年限'].value_counts().plot(kind='pie', autopct='%1.1f%%', explode=np.linspace(0, 0.75, 6))
+    data['工作年限'].value_counts().plot(kind='pie', autopct='%1.1f%%', explode=np.linspace(0, 0.75, 8))
     plt.title("工作经验饼图")
     plt.subplots_adjust(left=0.22, right=0.74, wspace=0.20, hspace=0.20,
                         bottom=0.17, top=0.84)
