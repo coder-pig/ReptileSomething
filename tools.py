@@ -6,7 +6,7 @@ import sys
 import config
 
 # 代理ip文件
-proxy_ip_file = config.code_tools_path + "proxy_ip.txt"
+proxy_ip_file = "proxy_ip.txt"
 proxy_ip_list = []
 lock = t.RLock()
 
