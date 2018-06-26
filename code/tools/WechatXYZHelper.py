@@ -13,6 +13,7 @@ xyz_compile = re.compile(r'.*?小宇宙整理.*?%d月%d日.*'
                          % (datetime.datetime.now().month, datetime.datetime.now().day), re.S)
 
 # 验证好友信息正则，关键词中有Python，Py和加群的关键字就可以了
+friend_content_compile = re.compile(r'content="(.*?)"')
 add_friend_compile = re.compile(r'Python|python|py|Py|加群|交易|朋友|屁眼')
 
 # 获取用户昵称的正则的
@@ -22,31 +23,35 @@ nickname_compile = re.compile(r'NickName\':\'(.*)\'', re.S)
 # 小宇宙日报抓取
 @itchat.msg_register([TEXT], isGroupChat=True)
 def xyz_reply(msg):
-    group_list = [u'我是渣渣辉', u'我是轱天乐', u'探挽懒月']
+    group_list = [u'淫意天盛娱乐集团', u'小猪的Python学习交流群']
     group_name = []
     for group in group_list:
         chat = itchat.search_chatrooms(name=group)
         if len(chat) > 0:
             group_name.append(chat[0]['UserName'])
     # 过滤小宇宙新闻
-    result = xyz_compile.search(msg['Content'])
-
-    if result is not None:
-        if result.group() is not None:
-            for group in group_name:
-                itchat.send('%s' % (msg['Content']), toUserName=group)
+    print(msg['ActualNickName'])
+    if msg['ActualNickName'] is not None and "小宇宙" in msg['ActualNickName']:
+        result = xyz_compile.search(msg['Content'])
+        if result is not None:
+            if result.group() is not None:
+                for group in group_name:
+                    itchat.send('%s' % (msg['Content']), toUserName=group)
 
 
 # 自动通过加好友
 @itchat.msg_register(itchat.content.FRIENDS)
 def deal_with_friend(msg):
-    if add_friend_compile.search(msg['Content']) is not None:
-        itchat.add_friend(**msg['Text'])  # 自动将新好友的消息录入，不需要重载通讯录
-        time.sleep(random.randint(1, 3))
-        itchat.send_msg('嘤嘤嘤，我是智障机器人小Pig，\n很高兴认识你，回复关键字:\n\n 加群，博客，Github，公众号，打赏 \n\n 来继续我们的摔跤♂故事！',
-                        msg['RecommendInfo']['UserName'])
-        time.sleep(random.randint(1, 3))
-        itchat.send_image('welcome.png', msg['RecommendInfo']['UserName'])
+    content = friend_content_compile.search(str(msg))
+    if content is not None:
+        if add_friend_compile.search(content.group(1)) is not None:
+            itchat.add_friend(**msg['Text'])  # 自动将新好友的消息录入，不需要重载通讯录
+            time.sleep(random.randint(1, 3))
+            itchat.send_msg('嘤嘤嘤，我是智障机器人小Pig，很高兴认识你，回复关键字:\n\n 加群，博客，Github，公众号，打赏 \n\n '
+                            '来继续我们的故♂事！\n( 可以别van♂我么，我只是个拉人机器人！！！)',
+                            msg['RecommendInfo']['UserName'])
+            time.sleep(random.randint(1, 3))
+            itchat.send_image('welcome.png', msg['RecommendInfo']['UserName'])
 
 
 # 自动处理信息
