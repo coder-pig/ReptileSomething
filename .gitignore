@@ -103,3 +103,5 @@ ENV/
 .mypy_cache/
 
 */build/
+
+*/.DS_Store
