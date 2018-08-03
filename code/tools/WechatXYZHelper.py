@@ -3,10 +3,13 @@ import datetime
 import re
 import time
 import random
-from threading import Timer
 
 import itchat
 from itchat.content import *
+from apscheduler.schedulers.blocking import BlockingScheduler
+
+# 加人列表
+friend_group = []
 
 # 小宇宙今天新闻匹配正则
 xyz_compile = re.compile(r'.*?小宇宙整理.*?%d月%d日.*'
@@ -16,9 +19,20 @@ xyz_compile = re.compile(r'.*?小宇宙整理.*?%d月%d日.*'
 friend_content_compile = re.compile(r'content="(.*?)"')
 add_friend_compile = re.compile(r'Python|python|py|Py|加群|交易|朋友|屁眼')
 
-# 获取用户昵称的正则的
-nickname_compile = re.compile(r'NickName\':\'(.*)\'', re.S)
+# 添加好友通过欢迎词
+welcome_words = '(˶ᵔᵕᵔ˶)\n嘤嘤嘤，我是智障机器人小Pig，发送关键字：菜单 \n可查看相关关键字！'
 
+# 菜单回复词
+menu_answer = '(˶ᵔᵕᵔ˶)可用关键词如下：\n1.加群\n2.博客\n3.Github\n4.公众号\n5.打赏\n6.小猪\n注：智障机器人不会聊天哦！'
+
+# 加群回复词
+add_group_answer = 'FBI Warning!(｀･ω･´)ゞ非常抱歉的通知您：\n\n微信粑粑把拉人接口禁掉了，你的加群请求已收到，小猪童鞋每隔3个小时会拉一波人。\n\nヾﾉ≧∀≦)o 麻烦耐心等候哦！'
+
+# 捐献回复词
+donate_answer = '(˶ᵔᵕᵔ˶)您的打赏，会让小猪更有动力肝♂出\n更Interesting的文章，谢谢支持～'
+
+# 小猪回复词
+pig_answer = '(˶ᵔᵕᵔ˶)小猪童鞋不闲聊哦，有问题欢迎到群里讨论哦~'
 
 # 小宇宙日报抓取
 @itchat.msg_register([TEXT], isGroupChat=True)
@@ -47,24 +61,24 @@ def deal_with_friend(msg):
         if add_friend_compile.search(content.group(1)) is not None:
             itchat.add_friend(**msg['Text'])  # 自动将新好友的消息录入，不需要重载通讯录
             time.sleep(random.randint(1, 3))
-            itchat.send_msg('嘤嘤嘤(˶ᵔᵕᵔ˶)，我是智障机器人小Pig，很高兴认识你，回复关键字:\n\n 加群，博客，Github，公众号，打赏，小猪 \n\n '
-                            '来继续我们的故♂事！\n( 别van♂我哦，我只是个拉人机器人，没有其他附加功能，不会聊天哦！！！)',
-                            msg['RecommendInfo']['UserName'])
+            itchat.send_msg(welcome_words,msg['RecommendInfo']['UserName'])
             time.sleep(random.randint(1, 3))
             itchat.send_image('welcome.png', msg['RecommendInfo']['UserName'])
 
 
-# 自动处理信息
-# 1.加好友后发送加群信息
-# 2.过滤加群信息
-# 3.公众号推荐
-# 4.打赏
+# 自动回复配置
 @itchat.msg_register([TEXT])
 def deal_with_msg(msg):
     text = msg['Content']
-    if text == u'加群':
+    if text == u'菜单':
+        time.sleep(random.randint(1,3))
+        itchat.send(menu_answer, msg['FromUserName'])
+    elif text == u'加群':
         time.sleep(random.randint(1, 3))
-        itchat.send_msg('(｀･ω･´)ゞ非常抱歉，微信粑粑把拉人接口禁掉了，只能等小猪童鞋手动拉你啦！ヾﾉ≧∀≦)o 滑♂稽！', msg['FromUserName'])
+        itchat.send_msg(add_group_answer, msg['FromUserName'])
+        nickname = msg['User']['NickName']
+        if nickname is not None and nickname not in friend_group:
+            friend_group.append(nickname)
     elif text == u'博客':
         time.sleep(random.randint(1, 3))
         return 'coder-pig的个人主页-掘金：https://juejin.im/user/570afb741ea493005de84da3'
@@ -78,12 +92,12 @@ def deal_with_msg(msg):
         time.sleep(random.randint(1, 3))
         itchat.send_image('ds.gif', msg['FromUserName'])
         time.sleep(random.randint(1, 3))
-        itchat.send_msg('(˶ᵔᵕᵔ˶)您的打赏，会让小猪更有动力肝♂出\n更Interesting的文章，谢谢支持～', msg['FromUserName'])
+        itchat.send_msg(donate_answer, msg['FromUserName'])
         time.sleep(random.randint(1, 3))
         itchat.send_image('wxpay.png', msg['FromUserName'])
     elif text == u'小猪':
         time.sleep(random.randint(1, 3))
-        itchat.send_msg('(˶ᵔᵕᵔ˶)小猪童鞋不闲聊哦，有问题欢迎到群里讨论哦~', msg['FromUserName'])
+        itchat.send_msg(pig_answer, msg['FromUserName'])
         time.sleep(random.randint(1, 3))
         itchat.send_image('scan_code.png', msg['FromUserName'])
     else:
@@ -96,8 +110,21 @@ def get_group_id(group_name):
     group_list = itchat.search_chatrooms(name=group_name)
     return group_list[0]['UserName']
 
+# 发送加群人信息列表
+def send_friend_group():
+    friend_str = str('\n'.join(friend_group)).rstrip()
+    if friend_str != '':
+        itchat.send_msg(friend_str, toUserName="filehelper")
+        friend_group.clear()
+
+# 登陆成功后开启定时任务
+def after_login():
+    sched.add_job(send_friend_group, 'interval', hours = 3)
+    sched.start()
+
 
 if __name__ == '__main__':
-    count = 0
+    sched = BlockingScheduler()
     itchat.auto_login(enableCmdQR=2)
-    itchat.run()
+    itchat.run(blockThread=False)
+    after_login()
